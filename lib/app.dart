@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'features/auth/login_screen.dart';
+
+import 'core/theme/app_theme.dart';
+import 'features/home/home_screen.dart';
 
 class MotoFlowApp extends StatelessWidget {
   const MotoFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'MotoFlow',
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      theme: AppTheme.light,
+      home: const HomeScreen(),
     );
   }
 }
