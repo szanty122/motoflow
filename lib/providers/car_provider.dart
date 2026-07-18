@@ -1,25 +1,38 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/car.dart';
 
-final carProvider = StateProvider<List<Car>>((ref) {
-  return [
-    const Car(
-      brand: "Opel",
-      model: "Vectra C GTS",
-      year: 2003,
-      mileage: 287000,
-      fuel: "Benzyna + LPG",
-      engine: "2.0 Turbo",
-      registration: "KBC12345",
-    ),
-    const Car(
-      brand: "BMW",
-      model: "320d",
-      year: 2018,
-      mileage: 165000,
-      fuel: "Diesel",
-      engine: "2.0",
-      registration: "KR54321",
-    ),
-  ];
+import '../models/car.dart';
+import '../services/car_service.dart';
+
+final carServiceProvider = Provider((ref) => CarService());
+
+final carsProvider =
+    StateNotifierProvider<CarNotifier, AsyncValue<List<Car>>>((ref) {
+  return CarNotifier(ref.read(carServiceProvider));
 });
+
+class CarNotifier extends StateNotifier<AsyncValue<List<Car>>> {
+  final CarService _service;
+
+  CarNotifier(this._service) : super(const AsyncLoading()) {
+    loadCars();
+  }
+
+  Future<void> loadCars() async {
+    try {
+      final cars = await _service.getCars();
+      state = AsyncData(cars);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<void> addCar(Car car) async {
+    await _service.addCar(car);
+    await loadCars();
+  }
+
+  Future<void> deleteCar(String id) async {
+    await _service.deleteCar(id);
+    await loadCars();
+  }
+}

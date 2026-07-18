@@ -9,7 +9,7 @@ class GarageScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cars = ref.watch(carProvider);
+    final carsAsync = ref.watch(carsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -26,33 +26,32 @@ class GarageScreen extends ConsumerWidget {
           );
         },
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: cars.length,
-        itemBuilder: (context, index) {
-          final car = cars[index];
+      body: carsAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+        error: (e, _) => Center(
+          child: Text("Błąd: $e"),
+        ),
+        data: (cars) => ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: cars.length,
+          itemBuilder: (context, index) {
+            final car = cars[index];
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 16),
-            child: ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.directions_car),
+            return Card(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: ListTile(
+                leading: const CircleAvatar(
+                  child: Icon(Icons.directions_car),
+                ),
+                title: Text("${car.brand} ${car.model}"),
+                subtitle: Text("${car.year} • ${car.mileage} km"),
+                trailing: const Icon(Icons.chevron_right),
               ),
-              title: Text("${car.brand} ${car.model}"),
-              subtitle: Text("${car.year} • ${car.mileage} km"),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  final notifier = ref.read(carProvider.notifier);
-
-                  final list = [...notifier.state];
-                  list.removeAt(index);
-                  notifier.state = list;
-                },
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

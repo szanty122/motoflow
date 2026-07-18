@@ -11,6 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const car = Car(
+      id: "demo",
       brand: "Opel",
       model: "Vectra C GTS",
       year: 2003,
