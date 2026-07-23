@@ -101,10 +101,22 @@ class _AddCarScreenState extends ConsumerState<AddCarScreen> {
                     registration: registration.text,
                   );
 
-                  await ref.read(carsProvider.notifier).addCar(car);
+                  try {
+                    await ref.read(carServiceProvider).addCar(car);
 
-                  if (context.mounted) {
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    debugPrint(e.toString());
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                        ),
+                      );
+                    }
                   }
                 },
                 child: const Text("Dodaj samochód"),
