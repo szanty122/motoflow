@@ -17,13 +17,15 @@ class GarageScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => const AddCarScreen(),
             ),
           );
+
+          ref.read(carsProvider.notifier).loadCars();
         },
       ),
       body: carsAsync.when(
@@ -33,25 +35,49 @@ class GarageScreen extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text("Błąd: $e"),
         ),
-        data: (cars) => ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: cars.length,
-          itemBuilder: (context, index) {
-            final car = cars[index];
-
-            return Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              child: ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.directions_car),
-                ),
-                title: Text("${car.brand} ${car.model}"),
-                subtitle: Text("${car.year} • ${car.mileage} km"),
-                trailing: const Icon(Icons.chevron_right),
+        data: (cars) {
+          if (cars.isEmpty) {
+            return const Center(
+              child: Text(
+                "Brak samochodów.\nDodaj pierwszy samochód.",
+                textAlign: TextAlign.center,
               ),
             );
-          },
-        ),
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: cars.length,
+            itemBuilder: (context, index) {
+              final car = cars[index];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 16),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.directions_car),
+                  ),
+                  title: Text("${car.brand} ${car.model}"),
+                  subtitle: Text(
+                    "${car.year} • ${car.mileage} km\n${car.engine} • ${car.fuel}",
+                  ),
+                  isThreeLine: true,
+                  trailing: IconButton(
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    onPressed: () async {
+                      await ref
+                          .read(carsProvider.notifier)
+                          .deleteCar(car.id);
+                    },
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
